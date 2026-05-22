@@ -14,12 +14,16 @@ grep -r "1916faa365f2788b6e193514872d51a242876569\|7cb42f57561c321ecb09b4552802a
   node_modules/ 2>/dev/null && echo "ALERT: found!" || echo "OK"
 
 echo "[4] kitty-monitor persistence..."
-(systemctl --user is-active kitty-monitor 2>/dev/null | grep -q inactive && \
-  echo "OK" || echo "ALERT: kitty-monitor is running!")
+if command -v systemctl > /dev/null 2>&1; then
+  systemctl --user is-active kitty-monitor 2>/dev/null | grep -q inactive && \
+    echo "OK" || echo "ALERT: kitty-monitor is running!"
+else
+  echo "systemctl not available. Skipping"
+fi
 
 echo "[5] Claude Code/VS Code hooks..."
 find ~/.claude ~/.vscode -name "*.json" 2>/dev/null | \
-  xargs grep -l "SessionStart\|firedalazer" 2>/dev/null && \
+  xargs grep -lE "SessionStart|firedalazer" 2>/dev/null && \
   echo "ALERT: hook found!" || echo "OK"
 
 echo "[6] Checking @tanstack ..."
